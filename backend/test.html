@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auth Test</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 500px; margin: auto; }
+    h2 { margin-top: 30px; }
+    input, button { display: block; width: 100%; margin: 5px 0; padding: 8px; }
+    .response { margin-top: 10px; padding: 10px; border: 1px solid #ccc; }
+    .success { border-color: green; color: green; }
+    .error { border-color: red; color: red; }
+  </style>
+</head>
+<body>
+
+<h1>Test Auth</h1>
+
+<!-- REGISTER FORM -->
+<h2>Register</h2>
+<form id="registerForm">
+  Name: <input type="text" id="regName" value="Alaa"><br>
+  Email: <input type="email" id="regEmail" value="alaa1@test.com"><br>
+  Password: <input type="password" id="regPassword" value="123456"><br>
+  <button type="submit">Register</button>
+</form>
+<div id="registerResponse" class="response"></div>
+
+<!-- LOGIN FORM -->
+<h2>Login</h2>
+<form id="loginForm">
+  Email: <input type="email" id="loginEmail" value="alaa1@test.com"><br>
+  Password: <input type="password" id="loginPassword" value="123456"><br>
+  <button type="submit">Login</button>
+</form>
+<div id="loginResponse" class="response"></div>
+
+<script>
+const API_URL = "http://localhost:5000/api/auth";
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const respDiv = document.getElementById("registerResponse");
+  respDiv.textContent = "Sending request...";
+  respDiv.className = "response";
+
+  const body = {
+    name: document.getElementById("regName").value,
+    email: document.getElementById("regEmail").value,
+    password: document.getElementById("regPassword").value
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      respDiv.textContent = data.message || JSON.stringify(data);
+      respDiv.className = "response success";
+    } else {
+      respDiv.textContent = data.error || JSON.stringify(data);
+      respDiv.className = "response error";
+    }
+  } catch (err) {
+    respDiv.textContent = "Request failed: " + err.message;
+    respDiv.className = "response error";
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const respDiv = document.getElementById("loginResponse");
+  respDiv.textContent = "Sending request...";
+  respDiv.className = "response";
+
+  const body = {
+    email: document.getElementById("loginEmail").value,
+    password: document.getElementById("loginPassword").value
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      respDiv.textContent = "Login successful! Token: " + data.token;
+      respDiv.className = "response success";
+    } else {
+      respDiv.textContent = data.error || JSON.stringify(data);
+      respDiv.className = "response error";
+    }
+  } catch (err) {
+    respDiv.textContent = "Request failed: " + err.message;
+    respDiv.className = "response error";
+  }
+}
+
+document.getElementById("registerForm").addEventListener("submit", handleRegister);
+document.getElementById("loginForm").addEventListener("submit", handleLogin);
+</script>
+
+</body>
+</html>
