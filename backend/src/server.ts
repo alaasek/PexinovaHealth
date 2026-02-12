@@ -9,8 +9,15 @@ const app = express();
 const PORT = 5000;
 
 // Enable CORS
-app.use(cors());
+app.use(
+  cors({
+    origin: '*', // for development
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
 
+app.use(cors());
 // Parse JSON bodies
 app.use(express.json());
 
