@@ -10,11 +10,12 @@ export default function VerifyEmail() {
 
   const handleVerify = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code }),
-      });
+      const res = await fetch("http://192.168.1.79:5000/api/auth/verify-code", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email, code }),
+});
+
       const data = await res.json();
 
       if (data.success) {
