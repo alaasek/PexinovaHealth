@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from '../constants/config';
 import {
   SafeAreaView,
   View,
@@ -9,6 +10,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { sendCode } from '../services/authService';
 
 export default function AddEmail() {
   const router = useRouter();
@@ -16,12 +18,7 @@ export default function AddEmail() {
 
   const handleContinue = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/send-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
+      const data = await sendCode(email);
 
       if (data.success) {
         router.push({ pathname: "/verify-email", params: { email } });

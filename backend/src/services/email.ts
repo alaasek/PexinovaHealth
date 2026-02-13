@@ -10,6 +10,11 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendVerificationEmail(email: string, code: string) {
+  if (!process.env.MAILTRAP_USER) {
+    console.log(`[MOCK EMAIL] Verification code for ${email}: ${code}`);
+    return;
+  }
+
   await transporter.sendMail({
     from: "no-reply@healthcare.com",
     to: email,

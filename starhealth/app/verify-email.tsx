@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ScreenWrapper from '../components/ScreenWrapper'; // ⚠️ adapte le chemin si nécessaire
+import { API_URL } from '../constants/config';
 
 export default function VerifyEmail() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function VerifyEmail() {
 
   const handleVerify = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-code", {
+      const res = await fetch(`${API_URL}/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code }),
