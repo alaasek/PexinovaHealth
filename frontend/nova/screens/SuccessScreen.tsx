@@ -1,0 +1,368 @@
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Dimensions,
+    Animated,
+    TouchableOpacity,
+    Image,
+    ImageBackground,
+    Easing,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation';
+import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useGame } from '../context/GameContext';
+
+const { width, height } = Dimensions.get('window');
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Success'>;
+
+const SuccessScreen: React.FC<Props> = ({ navigation }) => {
+    // Game Context
+    const { medicines, score } = useGame();
+    // In Success screen (before shooting on Home), we show the aliens that refer to the *current* state.
+    // However, usually Success is shown *after* a specific action (taking med).
+    // If we want consistency, let's show the same number of aliens as currently pending to be shot?
+    // Or just all remaining aliens.
+    const aliensAlive = medicines.length - score;
+
+    // Animation States
+    const [starsOpacity1] = useState(new Animated.Value(0.3));
+    const [starsOpacity2] = useState(new Animated.Value(0.5));
+
+    // Alien Float Animations
+    const [alienFloat1] = useState(new Animated.Value(0));
+    const [alienFloat2] = useState(new Animated.Value(0));
+    const [alienFloat3] = useState(new Animated.Value(0));
+
+    // Spinner Animation for Star Icon
+    const [spinValue] = useState(new Animated.Value(0));
+
+    useEffect(() => {
+        // --- Stars Animation ---
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(starsOpacity1, { toValue: 1, duration: 2500, useNativeDriver: true }),
+                Animated.timing(starsOpacity1, { toValue: 0.3, duration: 2500, useNativeDriver: true }),
+            ])
+        ).start();
+
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(starsOpacity2, { toValue: 1, duration: 1500, useNativeDriver: true }),
+                Animated.timing(starsOpacity2, { toValue: 0.2, duration: 1500, useNativeDriver: true }),
+            ])
+        ).start();
+
+        // --- Aliens Floating ---
+        const floatAlien = (anim: Animated.Value, delay: number) => {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.delay(delay),
+                    Animated.timing(anim, { toValue: -15, duration: 2000, useNativeDriver: true }),
+                    Animated.timing(anim, { toValue: 0, duration: 2000, useNativeDriver: true }),
+                ])
+            ).start();
+        };
+
+        floatAlien(alienFloat1, 0);
+        floatAlien(alienFloat2, 500);
+        floatAlien(alienFloat3, 1000);
+
+        // --- Spin Animation for Reward Star ---
+        Animated.loop(
+            Animated.timing(spinValue, {
+                toValue: 1,
+                duration: 3000,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start();
+
+    }, []);
+
+    const spin = spinValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg']
+    });
+
+    const handleContinue = () => {
+        // Navigate to Home and trigger the laser animation
+        navigation.navigate('Home', { triggerLaser: true });
+    };
+
+    // Helper to get position based on index to match visual consistency
+    const getAlienStyle = (index: number) => {
+        const positionIndex = index % 3;
+        // Group aliens closer together above/around the planet
+        if (positionIndex === 0) return { top: 20, left: width * 0.25 };
+        if (positionIndex === 1) return { top: 40, right: width * 0.25 };
+        return { top: 80, right: width * 0.15 };
+    };
+
+    return (
+        <ImageBackground
+            source={require('../assets/Background.png')}
+            style={styles.container}
+            resizeMode="cover"
+        >
+            <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.3)']}
+                style={styles.gradientOverlay}
+            />
+
+            {/* Animated Stars */}
+            <Animated.Image
+                source={require('../assets/stars.png')}
+                style={[styles.stars, { opacity: starsOpacity1 }]}
+                resizeMode="cover"
+            />
+            <Animated.Image
+                source={require('../assets/stars.png')}
+                style={[
+                    styles.stars,
+                    { opacity: starsOpacity2, transform: [{ rotate: '180deg' }] }
+                ]}
+                resizeMode="cover"
+            />
+
+            <SafeAreaView style={styles.safeArea}>
+
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.scoreContainer}>
+                        <Text style={styles.scoreText}>Score : </Text>
+                        <Text style={styles.scoreValue}>{score} stars</Text>
+                        <Image
+                            source={require('../assets/Sparkles.png')}
+                            style={styles.starIcon}
+                            resizeMode="contain"
+                        />
+                    </View>
+
+                    {/* Small Helmet */}
+                    <Image
+                        source={require('../assets/helmet.png')}
+                        style={styles.helmet}
+                        resizeMode="contain"
+                    />
+                </View>
+
+                {/* Space Center */}
+                <View style={styles.spaceArea}>
+                    {/* Dynamic Aliens */}
+                    {Array.from({ length: aliensAlive }).map((_, index) => {
+                        const anim = index % 3 === 0 ? alienFloat1 : index % 3 === 1 ? alienFloat2 : alienFloat3;
+                        return (
+                            <Animated.Image
+                                key={index}
+                                source={require('../assets/Alien.png')}
+                                style={[
+                                    styles.alien,
+                                    getAlienStyle(index),
+                                    { transform: [{ translateY: anim }] }
+                                ]}
+                                resizeMode="contain"
+                            />
+                        );
+                    })}
+
+                    {/* Planet */}
+                    <Image
+                        source={require('../assets/planet.png')}
+                        style={styles.planet}
+                        resizeMode="contain"
+                    />
+                </View>
+
+                {/* Success Modal */}
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={handleContinue}
+                >
+                    <View style={styles.modalCard}>
+                        <Text style={styles.modalText}>
+                            You have won a start that{'\n'}
+                            you will use to beat{'\n'}
+                            those aliens!
+                        </Text>
+
+                        {/* Spinning Icon */}
+                        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                            <Image
+                                source={require('../assets/Sparkles.png')}
+                                style={styles.rewardIcon}
+                                resizeMode="contain"
+                            />
+                        </Animated.View>
+                    </View>
+                </TouchableOpacity>
+
+                {/* Bottom Section - Fully Visible */}
+                <View style={styles.bottomSection}>
+                    <Image
+                        source={require('../assets/nave.png')}
+                        style={styles.rocket}
+                        resizeMode="contain"
+                    />
+                    <View style={styles.glassCard}>
+                        <View style={styles.textContainer}>
+                            <Text style={styles.greetingTitle}>Hi Harry!</Text>
+                            <Text style={styles.greetingSubtitle}>Welcome back, astronaut 🚀</Text>
+                            <Text style={styles.greetingBody}>Your galaxy is waiting for you ✨</Text>
+                        </View>
+                        <View style={styles.profileContainer}>
+                            <Image
+                                source={{ uri: 'https://via.placeholder.com/150' }}
+                                style={styles.profileImage}
+                            />
+                        </View>
+                    </View>
+                </View>
+
+                {/* Navigation Bar */}
+                <View style={styles.navBar}>
+                    <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
+                        <Ionicons name="home-outline" size={24} color="#8E8E9F" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        onPress={() => navigation.navigate('Notifications')}
+                    >
+                        <Ionicons name="notifications-outline" size={24} color="#8E8E9F" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.navItem}>
+                        <View style={styles.activeNavIconBg}>
+                            <MaterialCommunityIcons name="seed-outline" size={24} color="white" />
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.navItem}><Feather name="pie-chart" size={22} color="#8E8E9F" /></TouchableOpacity>
+                    <TouchableOpacity style={styles.navItem}><Ionicons name="person-outline" size={24} color="#8E8E9F" /></TouchableOpacity>
+                </View>
+
+            </SafeAreaView>
+        </ImageBackground>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#1E1035',
+    },
+    gradientOverlay: { ...StyleSheet.absoluteFillObject },
+    stars: { position: 'absolute', width: width, height: height, top: 0, left: 0 },
+    safeArea: { flex: 1 },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        zIndex: 10,
+    },
+    scoreContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
+    scoreText: { fontSize: 16, color: '#FFFFFF', fontWeight: '400' },
+    scoreValue: { fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' },
+    starIcon: { width: 20, height: 20, marginLeft: 5 },
+    helmet: { width: 80, height: 80, marginRight: -10, marginTop: 0 },
+    spaceArea: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+        marginTop: -50,
+    },
+    planet: { width: width * 0.4, height: width * 0.4, zIndex: 1 },
+    alien: { width: 40, height: 40, position: 'absolute', zIndex: 2, tintColor: '#FFFFFF' },
+
+    modalOverlay: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 20,
+    },
+    modalCard: {
+        backgroundColor: '#161025', // Dark distinct background
+        borderRadius: 24,
+        width: width * 0.75, // Slightly narrower
+        paddingHorizontal: 20,
+        paddingVertical: 30,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    modalText: {
+        fontSize: 16,
+        color: '#FFFFFF',
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: 20,
+        fontWeight: '500',
+    },
+    rewardIcon: {
+        width: 60,
+        height: 60,
+        tintColor: '#FFFFFF',
+    },
+
+    bottomSection: {
+        position: 'absolute',
+        bottom: 90,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 20,
+        // No opacity, fully visible
+    },
+    glassCard: {
+        backgroundColor: 'rgba(30, 20, 50, 0.6)',
+        borderRadius: 24,
+        padding: 24,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    textContainer: { flex: 1 },
+    greetingTitle: { fontSize: 14, color: '#E0E0E0', marginBottom: 4 },
+    greetingSubtitle: { fontSize: 15, fontWeight: '600', color: '#FFFFFF', marginBottom: 4 },
+    greetingBody: { fontSize: 12, color: '#B0B0C0' },
+    profileContainer: { marginLeft: 10 },
+    profileImage: { width: 45, height: 45, borderRadius: 22.5, borderWidth: 2, borderColor: '#FFFFFF', backgroundColor: '#ccc' },
+    rocket: { position: 'absolute', bottom: 50, right: 10, width: 80, height: 80, zIndex: 5 },
+    navBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        backgroundColor: 'rgba(23, 16, 40, 0.95)',
+        paddingVertical: 15,
+        paddingHorizontal: 15,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+    navItem: { alignItems: 'center', justifyContent: 'center', width: 50, height: 50 },
+    activeNavIconBg: {
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        backgroundColor: '#4A4A60',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
+
+export default SuccessScreen;
