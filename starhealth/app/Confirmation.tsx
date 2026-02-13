@@ -28,12 +28,28 @@ export default function Confirmation() {
   const [loading, setLoading] = useState(false);
   const [serverResp, setServerResp] = useState<any>(null);
 
+  // Fonction utilitaire pour traduire les messages d'erreur
+  const translateErrorMessage = (msg: string | null): string => {
+    if (!msg) return 'Une erreur est survenue';
+
+    switch (msg) {
+      case 'Utilisateur existe déjà':
+        return 'Cet email est déjà enregistré. Veuillez vous connecter ou utiliser un autre email.';
+      case 'Invalid credentials':
+        return 'Identifiants invalides. Vérifiez votre email et mot de passe.';
+      case 'Missing fields':
+        return 'Veuillez remplir tous les champs obligatoires.';
+      default:
+        return msg; // garde le message original si pas de traduction prévue
+    }
+  };
+
   const handleRegister = async () => {
     if (loading) return; // prevent duplicate calls
     console.log('handleRegister called');
 
     if (!email || !password || !name || !dob) {
-      Alert.alert('Missing data', 'Please complete all required fields.');
+      Alert.alert('Données manquantes', 'Veuillez compléter tous les champs obligatoires.');
       return;
     }
 
@@ -50,16 +66,17 @@ export default function Confirmation() {
       const message = res?.message || (res?.data && res.data.message) || null;
 
       if (!success) {
-        Alert.alert('Error', message || 'Registration failed');
+        const translated = translateErrorMessage(message);
+        Alert.alert('Erreur', translated);
         setLoading(false);
         return;
       }
 
-      Alert.alert('Success', 'Registration complete! Please log in.');
-      router.replace('/Login'); // keep exact case that matches your route file
+      Alert.alert('Succès', 'Inscription terminée ! Veuillez vous connecter.');
+      router.replace('/Login'); // garde la casse exacte qui correspond à ton fichier de route
     } catch (err: any) {
       console.error('confirmation register error:', err);
-      Alert.alert('Error', err?.message || 'Something went wrong');
+      Alert.alert('Erreur', err?.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }

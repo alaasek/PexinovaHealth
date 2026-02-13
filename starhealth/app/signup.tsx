@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
+import * as AuthSession from 'expo-auth-session';
 import ScreenWrapper from '../components/ScreenWrapper';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -22,39 +23,61 @@ export default function Signup() {
     clientId: '2011845419386722',
   });
 
+  // Print the redirect URIs used by expo-auth-session so you can register them in Google Cloud Console
+  useEffect(() => {
+  console.log('Signup mounted');
+  const nativeUri = AuthSession.makeRedirectUri({ useProxy: false } as any);
+  const proxyUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
+  console.log('AuthSession redirect (native):', nativeUri);
+  console.log('AuthSession redirect (proxy):', proxyUri);
+}, []);
+
+
   const handleGoogleLogin = async () => {
     if (!googleRequest) return;
 
-    const result = await googlePromptAsync();
+    try {
+      const result = await googlePromptAsync();
 
-    if (result.type === 'success') {
+      if (result.type !== 'success') {
+        return Alert.alert('Connexion Google annulée ou échouée');
+      }
+
       const idToken = result.authentication?.idToken;
       const accessToken = result.authentication?.accessToken;
 
-      // Sur mobile → idToken, sur web → accessToken
+      // mobile → idToken (JWT), web → accessToken
       const token = Platform.OS === 'web' ? accessToken : idToken;
 
       if (!token) {
-        return Alert.alert("Erreur : aucun token reçu");
+        return Alert.alert('Erreur : aucun token reçu');
       }
 
+      console.log('Sending token to backend, length:', token.length, 'platform:', Platform.OS);
+
+      const response = await fetch('http://192.168.1.79:5000/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+
+      const text = await response.text();
+      let data: any;
       try {
-        const response = await fetch('http://192.168.1.79:5000/api/auth/google', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          router.replace('/home');
-        } else {
-          Alert.alert('Erreur backend : ' + data.error);
-        }
-      } catch (err) {
-        Alert.alert('Impossible de contacter le backend');
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { raw: text };
       }
+
+      if (response.ok && data.success) {
+        router.replace('/home');
+      } else {
+        console.log('Backend error response:', response.status, data);
+        Alert.alert('Erreur backend', data.error || JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error('handleGoogleLogin error:', err);
+      Alert.alert('Impossible de contacter le backend');
     }
   };
 

@@ -13,25 +13,44 @@ import { useRouter } from 'expo-router';
 export default function AddEmail() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const API_URL = "http://192.168.1.79:5000/api/auth/send-code"; // ✅ correct
+
+console.log("API_URL in app:", API_URL);
+
 
   const handleContinue = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/send-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
+  try {
+    console.log("Sending request to:", API_URL);
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
 
-      if (data.success) {
-        router.push({ pathname: "/verify-email", params: { email } });
-      } else {
-        alert(data.message || "Failed to send code");
-      }
-    } catch (err) {
-      alert("Server error: " + err);
+    console.log("Response status:", res.status);
+
+    const text = await res.text();
+    console.log("Raw response:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.log("JSON parse error:", e);
+      alert("Server returned non-JSON: " + text);
+      return;
     }
-  };
+
+    if (data.success) {
+      router.push({ pathname: "/verify-email", params: { email } });
+    } else {
+      alert(data.message || "Failed to send code");
+    }
+  } catch (err) {
+    console.log("Fetch error details:", err);
+    alert("Server error: " + JSON.stringify(err));
+  }
+};
 
   return (
     <ImageBackground
