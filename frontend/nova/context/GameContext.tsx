@@ -19,6 +19,7 @@ interface GameContextType {
     bullets: number; // Number of "shots" earned by taking meds but not yet used
     markMedicineTaken: (id: number) => void;
     addMedicine: (med: Omit<Medicine, 'id' | 'taken' | 'minutes'>) => void;
+    updateMedicineTime: (id: number, time: string) => void;
     shootAlien: () => void;
     resetGame: () => void;
 }
@@ -81,6 +82,27 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setMedicines(prev => [...prev, medToAdd]);
     };
 
+    const updateMedicineTime = (id: number, time: string) => {
+        let minutes = 0;
+        try {
+            const parts = time.split(' ');
+            if (parts.length > 0) {
+                const timeParts = parts[0].split(':');
+                let h = parseInt(timeParts[0]) || 0;
+                const m = parseInt(timeParts[1]) || 0;
+                const isPm = parts[1] && parts[1].toLowerCase() === 'pm';
+                const isAm = parts[1] && parts[1].toLowerCase() === 'am';
+                if (isPm && h < 12) h += 12;
+                if (isAm && h === 12) h = 0;
+                minutes = h * 60 + m;
+            }
+        } catch (e) { }
+
+        setMedicines(prev => prev.map(med =>
+            med.id === id ? { ...med, time, minutes } : med
+        ));
+    };
+
     const shootAlien = () => {
         if (bullets > 0) {
             setScore(s => s + 1);
@@ -95,7 +117,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <GameContext.Provider value={{ medicines, score, bullets, markMedicineTaken, addMedicine, shootAlien, resetGame }}>
+        <GameContext.Provider value={{ medicines, score, bullets, markMedicineTaken, addMedicine, updateMedicineTime, shootAlien, resetGame }}>
             {children}
         </GameContext.Provider>
     );
