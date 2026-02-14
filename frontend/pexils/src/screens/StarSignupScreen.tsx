@@ -59,7 +59,7 @@ export default function StarSignupScreen() {
   };
 
   const handleAppleLogin = () => {
-    Alert.alert('Apple login pressed');
+    alert('Apple login pressed');
   };
 
   return (
@@ -68,7 +68,7 @@ export default function StarSignupScreen() {
 
       <TouchableOpacity
         style={styles.primaryButton}
-        onPress={() => navigation.push('AddEmail')}
+        onPress={() => navigation.navigate('AddEmail')}
       >
         <Text style={styles.primaryButtonText}>Continue with email</Text>
       </TouchableOpacity>
@@ -105,12 +105,6 @@ export default function StarSignupScreen() {
           <Text style={styles.secondaryText}>Continue with Google</Text>
         </View>
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.loginLink}>
-          Already have an account? <Text style={{ fontWeight: 'bold', color: '#d45425' }}>Log In</Text>
-        </Text>
-      </TouchableOpacity>
     </ScreenWrapper>
   );
 }
@@ -122,7 +116,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Poppins-Bold',
   },
   primaryButton: {
     backgroundColor: '#d45425',
@@ -132,8 +125,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     width: '100%',
   },
-  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
-  or: { color: '#9ca3af', textAlign: 'center', marginVertical: 12, fontFamily: 'Poppins-Regular' },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  or: { color: '#9ca3af', textAlign: 'center', marginVertical: 12 },
   secondaryButton: {
     borderWidth: 1,
     borderColor: '#fff',
@@ -149,11 +142,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 5,
   },
-  secondaryText: { color: '#fff', fontSize: 15, fontWeight: '500', marginLeft: 10, fontFamily: 'Poppins-Medium' },
-  loginLink: {
-    color: '#ccc',
-    textAlign: 'center',
-    marginTop: 20,
-    fontFamily: 'Poppins-Regular'
-  }
+  secondaryText: { color: '#fff', fontSize: 15, fontWeight: '500' },
 });

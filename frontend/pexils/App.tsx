@@ -18,6 +18,18 @@ import StarSignupScreen from './src/screens/StarSignupScreen';
 import StarHomeScreen from './src/screens/StarHomeScreen';
 import BonusScreen from './src/screens/BonusScreen';
 
+import StarAddEmailScreen from './src/screens/StarAddEmailScreen';
+import StarVerifyEmailScreen from './src/screens/StarVerifyEmailScreen';
+import StarEnterPasswordScreen from './src/screens/StarEnterPasswordScreen';
+import StarEnterNameScreen from './src/screens/StarEnterNameScreen';
+import StarEnterDOBScreen from './src/screens/StarEnterDOBScreen';
+import StarEnterDiseaseScreen from './src/screens/StarEnterDiseaseScreen';
+import StarEnterMedicationScreen from './src/screens/StarEnterMedicationScreen';
+import StarConfirmationScreen from './src/screens/StarConfirmationScreen';
+import StarForgotPswdScreen from './src/screens/StarForgotPswdScreen';
+import StarVerifyCodeScreen from './src/screens/StarVerifyCodeScreen';
+import StarResetPasswordScreen from './src/screens/StarResetPasswordScreen';
+
 import SettingsScreen from './src/screens/SettingsScreen';
 import TermsScreen from './src/screens/TermsScreen';
 import PrivacyScreen from './src/screens/PrivacyScreen';
@@ -76,6 +88,20 @@ export default function App() {
             <Stack.Screen name="Signup" component={StarSignupScreen} />
             <Stack.Screen name="StarHome" component={StarHomeScreen} />
             <Stack.Screen name="Bonus" component={BonusScreen} />
+
+            {/* StarHealth Auth Flow */}
+            <Stack.Screen name="AddEmail" component={StarAddEmailScreen} />
+            <Stack.Screen name="VerifyEmail" component={StarVerifyEmailScreen} />
+            <Stack.Screen name="EnterPassword" component={StarEnterPasswordScreen} />
+            <Stack.Screen name="EnterName" component={StarEnterNameScreen} />
+            <Stack.Screen name="EnterDOB" component={StarEnterDOBScreen} />
+            <Stack.Screen name="EnterDisease" component={StarEnterDiseaseScreen} />
+            <Stack.Screen name="EnterMedication" component={StarEnterMedicationScreen} />
+            <Stack.Screen name="ConfirmSignup" component={StarConfirmationScreen} />
+            <Stack.Screen name="ForgotPswd" component={StarForgotPswdScreen} />
+            <Stack.Screen name="VerifyCode" component={StarVerifyCodeScreen} />
+            <Stack.Screen name="ResetPassword" component={StarResetPasswordScreen} />
+
 
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Terms" component={TermsScreen} />

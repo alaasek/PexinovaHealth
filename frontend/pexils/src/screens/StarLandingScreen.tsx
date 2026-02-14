@@ -33,7 +33,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     marginBottom: 40,
-    fontFamily: 'Poppins-Bold',
   },
   highlight: { color: '#d45425' },
   image: { width: 250, height: 250, marginBottom: 30, alignSelf: 'center' },
@@ -44,5 +43,5 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
   },
-  primaryButtonText: { color: '#fff', fontSize: 18, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
+  primaryButtonText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });
