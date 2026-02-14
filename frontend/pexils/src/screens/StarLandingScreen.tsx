@@ -20,7 +20,7 @@ export default function StarLandingScreen() {
       />
 
       <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.primaryButtonText}>Let’s Go 🚀</Text>
+        <Text style={styles.primaryButtonText}>Log In</Text>
       </TouchableOpacity>
     </ScreenWrapper>
   );
